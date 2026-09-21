@@ -1,3 +1,4 @@
+namespace yet_another_tetris_clone.Core;
 enum TetrominoType
 {
     I,
