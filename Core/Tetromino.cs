@@ -1,17 +1,18 @@
 namespace yet_another_tetris_clone.Core;
-class Tetromino
-{
-    int x {get; private set;};
-    int y {get; private set;};
-    TetrominoType type;
-    int[,] shape;
 
-    public Tetromino(int x, int y, TetrominoType type, int[,] shape)
+public class Tetromino
+{
+    public int X { get; private set; }
+    public int Y { get; private set; }
+    public TetrominoType Type { get; private set; }
+    public int[,] Shape { get; private set; }
+
+    public Tetromino(TetrominoType type, int[,] shape, int x, int y)
     {
-        this.x = x;
-        this.y = y;
-        this.type = type;
-        this.shape = shape;
+        this.Type = type;
+        this.Shape = shape;
+        this.X = x;
+        this.Y = y;
     }
 
     public void RotateClockwise(Board board)
@@ -66,31 +67,34 @@ class Tetromino
 
     public void MoveLeft(Board board)
     {
-        if (board.IsValidPosition(this, x - 1, y))
+        if (board.IsValidPosition(this, X - 1, Y))
         {
-            x--;
+            X--;
         }
     }
 
     public void MoveRight(Board board)
     {
-        if (board.IsValidPosition(this, x + 1, y))
+        if (board.IsValidPosition(this, X + 1, Y))
         {
-            x++;
+            X++;
         }
     }
 
-    public void MoveDown(Board board)
+    public bool MoveDown(Board board)
     {
-        if (board.IsValidPosition(this, x, y + 1))
+        if (board.IsValidPosition(this, X, Y + 1))
         {
-            y++;
+            Y++;
+            return true;
         }
+        
+        return false;
     }
 
     public void Drop(Board board)
     {
         int dropDistance = board.CalculateDropDistance(this);
-        y += dropDistance;
+        Y += dropDistance;
     }
 }

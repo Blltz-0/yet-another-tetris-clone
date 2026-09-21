@@ -1,57 +1,63 @@
 namespace yet_another_tetris_clone.Core;
-class Board
+
+public class Board
 {
-    int width = 10;
-    int height = 20;
-    int[,] grid;
+    // These must be public properties so Game1.cs can read them for drawing
+    public int Width { get; private set; } = 10;
+    public int Height { get; private set; } = 20;
+    public int[,] Grid { get; private set; }
 
     public Board()
     {
-        grid = new int[height, width];
+        Grid = new int[Height, Width];
     }
 
-    public bool IsValidPosition(Tetromino tetromino, int newX, int newY)
+    public bool IsValidPosition(Tetromino piece, int targetX, int targetY)
     {
-        for (int row = 0; row < tetromino.shape.GetLength(0); row++)
+        for (int row = 0; row < piece.Shape.GetLength(0); row++)
         {
-            for (int col = 0; col < tetromino.shape.GetLength(1); col++)
+            for (int col = 0; col < piece.Shape.GetLength(1); col++)
             {
-                if (tetromino.shape[row, col] != 0)
+                if (piece.Shape[row, col] != 0)
                 {
-                    int boardX = newX + col;
-                    int boardY = newY + row;
+                    int globalX = targetX + col;
+                    int globalY = targetY + row;
 
                     // Check left, right, and bottom boundaries
-                    if (boardX < 0 || boardX >= width || boardY >= height)
-                        return false;
-
-                    // Check for collision with existing pieces
-                    if (boardY >= 0)
+                    if (globalX < 0 || globalX >= Width || globalY >= Height)
                     {
-                        if (grid[boardY, boardX] != 0)
                         return false;
                     }
-                    
+
+                    // Check for collision with existing pieces
+                    if (globalY >= 0)
+                    {
+                        if (Grid[globalY, globalX] != 0)
+                        {
+                            return false;
+                        }
+                    }
                 }
             }
         }
+        
         return true;
     }
 
-    public void PlaceTetromino(Tetromino tetromino)
+    public void PlaceTetromino(Tetromino piece)
     {
-        for (int row = 0; row < tetromino.shape.GetLength(0); row++)
+        for (int row = 0; row < piece.Shape.GetLength(0); row++)
         {
-            for (int col = 0; col < tetromino.shape.GetLength(1); col++)
+            for (int col = 0; col < piece.Shape.GetLength(1); col++)
             {
-                if (tetromino.shape[row, col] != 0)
+                if (piece.Shape[row, col] != 0)
                 {
-                    int boardX = tetromino.x + col;
-                    int boardY = tetromino.y + row;
+                    int globalX = piece.X + col;
+                    int globalY = piece.Y + row;
 
-                    if (boardY >= 0 && boardY < height && boardX >= 0 && boardX < width)
+                    if (globalY >= 0 && globalY < Height && globalX >= 0 && globalX < Width)
                     {
-                        grid[boardY, boardX] = (int)tetromino.type;
+                        Grid[globalY, globalX] = piece.Shape[row, col];
                     }
                 }
             }
@@ -115,10 +121,12 @@ class Board
     public int CalculateDropDistance(Tetromino piece)
     {
         int dropDistance = 0;
-        while (IsValidPosition(piece, piece.x, piece.y + dropDistance + 1))
+
+        while (IsValidPosition(piece, piece.X, piece.Y + dropDistance + 1))
         {
             dropDistance++;
         }
+
         return dropDistance;
     }
 }

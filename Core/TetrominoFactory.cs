@@ -1,17 +1,18 @@
 namespace yet_another_tetris_clone.Core;
+
 public static class TetrominoFactory
 {
     public static Tetromino CreatePiece(TetrominoType type)
     {
         int[,] shape;
         int startX = 3; // Default starting X to center 3x3 and 4x4 pieces on a 10-wide board
-        int startY = 0; // Spawns at the very top row
+        int startY = -3; // Spawns in the negative buffer zone above the board
 
         switch (type)
         {
-        case TetrominoType.I:
-            int i = (int)TetrominoType.I;
-            shape = new int[,] {
+            case TetrominoType.I:
+                int i = (int)TetrominoType.I;
+                shape = new int[,] {
                     { 0, 0, i, 0 },
                     { 0, 0, i, 0 },
                     { 0, 0, i, 0 },
