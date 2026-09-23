@@ -23,18 +23,18 @@ public static class TetrominoFactory
             case TetrominoType.J:
                 int j = (int)TetrominoType.J;
                 shape = new int[,] {
-                    { 0, j, 0 },
-                    { 0, j, 0 },
-                    { j, j, 0 }
+                    { j, 0, 0 },
+                    { j, j, j },
+                    { 0, 0, 0 }
                 };
                 break;
 
             case TetrominoType.L:
                 int l = (int)TetrominoType.L;
                 shape = new int[,] {
-                    { 0, l, 0 },
-                    { 0, l, 0 },
-                    { 0, l, l }
+                    { 0, 0, l },
+                    { l, l, l },
+                    { 0, 0, 0 }
                 };
                 break;
 
