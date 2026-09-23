@@ -15,18 +15,22 @@ public class Game1 : Game
 
     private Board _board;
     private Tetromino _activePiece;
+    private TetrominoType? _heldPiece;
+    private bool _hasHeldThisTurn = false;
     private Random _random;
     
     private List<TetrominoType> _pieceBag = new List<TetrominoType>();
 
     private const int BlockSize = 32;
-    private const int OffsetX = 100;
+    private const int OffsetX = 800 / 2 - (10 * BlockSize) / 2;
     private const int OffsetY = 50;
 
     private double _dropTimer = 0;
     private double _dropInterval = 500; // Drop every 500 milliseconds
 
     private KeyboardState _previousKeyboardState;
+    
+    
 
     public Game1()
     {
@@ -57,15 +61,16 @@ public class Game1 : Game
 
     private void _SpawnNewTetromino()
     {
-        if (_pieceBag.Count == 0)
+        if (_pieceBag.Count <= 5)
         {
+            int startIndex = _pieceBag.Count;
             _pieceBag.AddRange(new[] {
                 TetrominoType.I, TetrominoType.J, TetrominoType.L,
                 TetrominoType.O, TetrominoType.S, TetrominoType.T, TetrominoType.Z
             });
             
             // Shuffle the bag
-            for (int i = 0; i < _pieceBag.Count; i++)
+            for (int i = startIndex; i < _pieceBag.Count; i++)
             {
                 int k = _random.Next(i, _pieceBag.Count);
                 TetrominoType temp = _pieceBag[i];
@@ -111,6 +116,25 @@ public class Game1 : Game
         {
             _activePiece.RotateClockwise(_board);
         }
+        if ((currentKeyboardState.IsKeyDown(Keys.LeftShift) || currentKeyboardState.IsKeyDown(Keys.RightShift)) && 
+    (!_previousKeyboardState.IsKeyDown(Keys.LeftShift) && !_previousKeyboardState.IsKeyDown(Keys.RightShift)))
+        {
+            if (!_hasHeldThisTurn)
+            {
+                if (_heldPiece.HasValue)
+                {
+                    TetrominoType temp = _heldPiece.Value;
+                    _heldPiece = _activePiece.Type;
+                    _activePiece = TetrominoFactory.CreatePiece(temp);
+                }
+                else
+                {
+                    _heldPiece = _activePiece.Type;
+                    _SpawnNewTetromino();
+                }
+                _hasHeldThisTurn = true;
+            }
+        }
         if (currentKeyboardState.IsKeyDown(Keys.Space) && !_previousKeyboardState.IsKeyDown(Keys.Space))
         {
             _activePiece.Drop(_board);
@@ -140,6 +164,7 @@ public class Game1 : Game
         _board.PlaceTetromino(_activePiece);
         _board.ClearLines();
         _SpawnNewTetromino();
+        _hasHeldThisTurn = false;
     }
 
     protected override void Draw(GameTime gameTime)
@@ -161,7 +186,7 @@ public class Game1 : Game
                 else
                 {
                     // Draw the grid lines for empty cells
-                    DrawBlock(x, y, Color.DarkGray * 0.1f); // Light gray for grid lines
+                    DrawBlock(x, y, Color.DarkGray * 0.1f);
                 }
             }
         }
@@ -199,6 +224,43 @@ public class Game1 : Game
                     if (drawY >= 0)
                     {
                         DrawBlock(drawX, drawY, GetColorForBlock((int)_activePiece.Type));
+                    }
+                }
+            }
+        }
+
+        // 4. Draw the held piece
+        if (_heldPiece.HasValue)
+        {
+            // Draw the held piece in the left sidebar
+            Tetromino heldTetromino = TetrominoFactory.CreatePiece(_heldPiece.Value);
+            for (int row = 0; row < heldTetromino.Shape.GetLength(0); row++)
+            {
+                for (int col = 0; col < heldTetromino.Shape.GetLength(1); col++)
+                {
+                    if (heldTetromino.Shape[row, col] != 0)
+                    {
+                        int drawX = - 5 + col;
+                        int drawY = 2 + row;
+                        DrawBlock(drawX, drawY, GetColorForBlock((int)_heldPiece.Value));
+                    }
+                }
+            }
+        }
+
+        //5. Draw the next pieces in the sidebar
+        for (int i = 0; i < Math.Min(5, _pieceBag.Count); i++)
+        {
+            Tetromino nextTetromino = TetrominoFactory.CreatePiece(_pieceBag[i]);
+            for (int row = 0; row < nextTetromino.Shape.GetLength(0); row++)
+            {
+                for (int col = 0; col < nextTetromino.Shape.GetLength(1); col++)
+                {
+                    if (nextTetromino.Shape[row, col] != 0)
+                    {
+                        int drawX = _board.Width + 2 + col;
+                        int drawY = 2 + i * 4 + row; // Adjusted Y
+                        DrawBlock(drawX, drawY, GetColorForBlock((int)_pieceBag[i]));
                     }
                 }
             }
